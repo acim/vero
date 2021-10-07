@@ -28,8 +28,8 @@ impl From<mysql_async::Error> for Error {
 #[async_trait]
 pub trait Storage {
     async fn projects(&self) -> Result<Vec<Project>, Error>;
-    async fn update_gh_l8st_rel(id: u64, version: &str) -> Result<(), Error>;
-    async fn update_dh_l8st_tag(id: u64, tag: &str) -> Result<(), Error>;
+    async fn update_gh_l8st_rel(&self, id: u64, version: &str) -> Result<(), Error>;
+    async fn update_dh_l8st_tag(&self, id: u64, tag: &str) -> Result<(), Error>;
 }
 
 pub struct MysqlStorage {
@@ -69,11 +69,29 @@ impl Storage for MysqlStorage {
         Ok(rs.await?)
     }
 
-    async fn update_gh_l8st_rel(id: u64, version: &str) -> Result<(), Error> {
-        todo!()
+    async fn update_gh_l8st_rel(&self, id: u64, ver: &str) -> Result<(), Error> {
+        let mut conn = self.pool.get_conn().await?;
+        let q = r"UPDATE projects SET gh_l8st_rel=:gh_l8st_rel WHERE id=:id";
+        let rs = conn.exec_drop(
+            q,
+            params! {
+                "id" => id,
+                "gh_l8st_rel" => ver,
+            },
+        );
+        Ok(rs.await?)
     }
 
-    async fn update_dh_l8st_tag(id: u64, tag: &str) -> Result<(), Error> {
-        todo!()
+    async fn update_dh_l8st_tag(&self, id: u64, tag: &str) -> Result<(), Error> {
+        let mut conn = self.pool.get_conn().await?;
+        let q = r"UPDATE projects SET dh_l8st_tag=:dh_l8st_tag WHERE id=:id";
+        let rs = conn.exec_drop(
+            q,
+            params! {
+                "id" => id,
+                "dh_l8st_tag" => tag,
+            },
+        );
+        Ok(rs.await?)
     }
 }
