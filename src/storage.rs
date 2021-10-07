@@ -32,6 +32,7 @@ pub trait Storage {
     async fn update_dh_l8st_tag(&self, id: u64, tag: &str) -> Result<(), Error>;
 }
 
+#[derive(Clone)]
 pub struct MysqlStorage {
     pool: mysql_async::Pool,
 }

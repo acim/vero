@@ -19,15 +19,25 @@ async fn main() {
         Err(e) => eprintln!("error: {}", e),
     }
 
-    match s.update_gh_l8st_rel(99465516409683968, "v1.0.0").await {
-        Ok(_) => (),
-        Err(e) => eprintln!("error: {}", e),
-    }
+    let mut handles = vec![];
+    let s2 = s.clone();
+    let s3 = s.clone();
 
-    match s.update_dh_l8st_tag(99465516409683968, "v1.0.0").await {
-        Ok(_) => (),
-        Err(e) => eprintln!("error: {}", e),
-    }
+    handles.push(tokio::spawn(async move {
+        match s.update_gh_l8st_rel(99465516409683968, "v1.0.0").await {
+            Ok(_) => (),
+            Err(e) => eprintln!("error: {}", e),
+        }
+    }));
 
-    s.disconnect().await.unwrap()
+    handles.push(tokio::spawn(async move {
+        match s2.update_dh_l8st_tag(99465516409683968, "v1.0.0").await {
+            Ok(_) => (),
+            Err(e) => eprintln!("error: {}", e),
+        }
+    }));
+
+    futures::future::join_all(handles).await;
+
+    s3.disconnect().await.unwrap();
 }
