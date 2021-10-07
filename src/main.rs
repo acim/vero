@@ -21,15 +21,10 @@ async fn main() {
 
     let mut handles = vec![];
 
-    {
-        let s = s.clone();
-        handles.push(tokio::spawn(async move {
-            match s.update_gh_l8st_rel(99465516409683968, "v1.0.0").await {
-                Ok(_) => (),
-                Err(e) => eprintln!("error: {}", e),
-            }
-        }));
-    }
+    handles.push(
+        s.update_gh_l8st_rel(99465516409683968, "v1.0.0".to_owned())
+            .await,
+    );
 
     {
         let s = s.clone();
