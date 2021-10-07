@@ -40,6 +40,11 @@ impl MysqlStorage {
     pub fn new(pool: mysql_async::Pool) -> Self {
         Self{pool}
     }
+
+    pub async fn disconnect(&self) -> Result<(), Error>{
+        let rs = self.pool.clone().disconnect();
+        Ok(rs.await?)
+    }
 }
 
 #[async_trait]
@@ -48,8 +53,8 @@ impl Storage for MysqlStorage {
         let mut conn = self.pool.get_conn().await?;
         let q = r"SELECT id, gh_owner, gh_repo, gh_l8st_rel, dh_owner, dh_repo, dh_l8st_tag
                   FROM projects";
-        let _projects = conn.exec_map(q, (),|(id, gh_owner, gh_repo, gh_l8st_rel, dh_owner, dh_repo, dh_l8st_tag)| Project { id, gh_owner, gh_repo, gh_l8st_rel, dh_owner, dh_repo, dh_l8st_tag }).await?;
-        todo!()
+        let rs = conn.exec_map(q, (),|(id, gh_owner, gh_repo, gh_l8st_rel, dh_owner, dh_repo, dh_l8st_tag)| Project { id, gh_owner, gh_repo, gh_l8st_rel, dh_owner, dh_repo, dh_l8st_tag });
+Ok(rs.await?)
     }
 
     async fn update_gh_l8st_rel(id: u64, version: &str) -> Result<(), Error> {

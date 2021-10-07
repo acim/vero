@@ -9,7 +9,13 @@ mod storage;
 
 #[tokio::main]
 async fn main() {
-    let s = storage::MysqlStorage::new(mysql_async::Pool::new(""));
-    let ps = s.projects().await.unwrap();
-    println!("result {:?}", ps);
+    let pool = mysql_async::Pool::new("mysql://root:password@127.0.0.1:3307/mysql");
+
+    let s = storage::MysqlStorage::new(pool);
+    match s.projects().await {
+        Ok(rs) => println!("result: {:?}", rs),
+        Err(e) => eprintln!("error: {}", e)
+    }
+
+    s.disconnect().await.unwrap()
 }
