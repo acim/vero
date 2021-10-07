@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  mariadb:
+    image: bitnami/mariadb
+    container_name: vero-mariadb
+    restart: always
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_USER=${DB_USERNAME}
+      - MARIADB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - vero:/bitnami/mariadb
+    ports:
+      - 3306:3306
+  migrate:
+    image: migrate/migrate
+    container_name: vero-migrate
+    depends_on:
+      - mariadb
+    volumes:
+      - ./migrations:/migrations
+    command:
+      - -path=/migrations/
+      - -database=mysql://${DSN}?multiStatements=true
+      - up
+  adminer:
+    image: adminer
+    container_name: vero-adminer
+    restart: always
+    depends_on:
+      - mariadb
+    environment:
+      - ADMINER_DEFAULT_SERVER=mariadb
+    ports:
+      - 8080:8080
+volumes:
+  vero:
