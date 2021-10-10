@@ -99,7 +99,7 @@ async fn main() {
                             match repo {
                                 Ok(r) => {
                                     println!("repository: {}", r.name);
-                                    s.upsert_dh("library".to_string(), r.name);
+                                    s.insert_dh("library".to_string(), r.name);
                                 }
                                 Err(e) => eprintln!("error: {}", e),
                             }
