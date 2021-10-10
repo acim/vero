@@ -37,6 +37,8 @@ impl Repositories {
             self.owner, self.page, self.per_page
         );
 
+        println!("url: {}", url);
+
         let response = self.client.get(&url).send()?.json::<Data>()?;
         self.repositories = response.results.into_iter();
         self.total = response.count;
@@ -60,7 +62,7 @@ impl Iterator for Repositories {
 #[serde(rename_all = "camelCase")]
 pub struct Data {
     pub count: u64,
-    pub next: String,
+    pub next: ::serde_json::Value,
     pub previous: ::serde_json::Value,
     pub results: Vec<Repository>,
 }
@@ -72,7 +74,7 @@ pub struct Repository {
     pub name: String,
     pub namespace: String,
     #[serde(rename = "repository_type")]
-    pub repository_type: String,
+    pub repository_type: ::serde_json::Value,
     pub status: u64,
     pub description: String,
     #[serde(rename = "is_private")]
