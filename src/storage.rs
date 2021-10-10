@@ -20,7 +20,7 @@ pub trait Storage {
     async fn projects(&self) -> Result<Vec<Project>>;
     async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> Result<()>;
     async fn update_dh_l8st_tag(&self, id: u64, tag: String) -> Result<()>;
-    async fn upsert_dh(&self, owner: String, repo: String) -> Result<()>;
+    fn upsert_dh(&self, owner: String, repo: String);
 }
 
 #[derive(Clone)]
@@ -33,9 +33,8 @@ impl MysqlStorage {
         Self { pool }
     }
 
-    pub async fn disconnect(&self) -> Result<()> {
-        let rs = self.pool.clone().disconnect();
-        Ok(rs.await?)
+    pub fn disconnect(&self) {
+        let _rs = self.pool.clone().disconnect();
     }
 }
 
@@ -98,15 +97,16 @@ impl Storage for MysqlStorage {
         Ok(rs.await?)
     }
 
-    async fn upsert_dh(&self, owner: String, repo: String) -> Result<()> {
-        let mut conn = self.pool.get_conn().await.unwrap();
-        let q = r"INSERT INTO projects (dh_owner, dh_repo)
-                  VALUES(:owner, :repo)
-                  ON CONFLICT ON CONSTRAINT dh_owner_repo_unique DO
-                  UPDATE SET owner=:owner, repo=:repo";
+    fn upsert_dh(&self, owner: String, repo: String) {
+        let q = r"INSERT INTO projects (dh_owner, dh_repo) VALUES(:owner, :repo)
+                  ON DUPLICATE KEY UPDATE dh_owner=:owner, dh_repo=:repo";
 
-        let rs = tokio::spawn(async move {
+        let conn = self.pool.get_conn();
+
+        tokio::spawn(async move {
             match conn
+                .await
+                .unwrap() // TODO: Breaks here
                 .exec_drop(
                     q,
                     params! {
@@ -120,7 +120,5 @@ impl Storage for MysqlStorage {
                 Err(e) => eprintln!("error: {}", e),
             }
         });
-
-        Ok(rs.await?)
     }
 }
