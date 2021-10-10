@@ -1,12 +1,13 @@
 //!
 use reqwest::Result;
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
 const PER_PAGE: u64 = 100;
 
-pub struct Repositories<T>
+pub struct Collection<T>
 where
-    T: serde::de::DeserializeOwned,
+    T: DeserializeOwned,
 {
     owner: String,
     repositories: <Vec<T> as IntoIterator>::IntoIter,
@@ -16,12 +17,12 @@ where
     total: u64,
 }
 
-impl<T> Repositories<T>
+impl<T> Collection<T>
 where
-    T: serde::de::DeserializeOwned,
+    T: DeserializeOwned,
 {
     pub fn of(owner: &str) -> Result<Self> {
-        Ok(Repositories {
+        Ok(Collection {
             owner: owner.to_owned(),
             repositories: vec![].into_iter(),
             client: reqwest::blocking::Client::new(),
@@ -55,9 +56,9 @@ where
     }
 }
 
-impl<T> Iterator for Repositories<T>
+impl<T> Iterator for Collection<T>
 where
-    T: serde::de::DeserializeOwned,
+    T: DeserializeOwned,
 {
     type Item = Result<T>;
 

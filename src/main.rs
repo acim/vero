@@ -43,7 +43,7 @@ async fn main() -> Result<(), reqwest::Error> {
 
     // DockerHub
     tokio::task::spawn_blocking(move || {
-        if let Ok(repos) = dockerhub::Repositories::<dockerhub::Repository>::of("library") {
+        if let Ok(repos) = dockerhub::Collection::<dockerhub::Repository>::of("library") {
             for repo in repos {
                 match repo {
                     Ok(r) => println!("repository: {}", r.name),
