@@ -92,6 +92,9 @@ async fn main() -> Result<()> {
             SubSubCommand::DockerHub(_dh) => {
                 let c = dockerhub::Client::new();
                 for r in c.repos("library".to_string()).await.unwrap() {
+                    if r.description.starts_with("DEPRECATED") {
+                        continue;
+                    }
                     println!("repository: {}", r.name);
                     s.insert_dh("library".to_string(), r.name).await.unwrap();
                 }
