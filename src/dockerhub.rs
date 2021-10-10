@@ -20,20 +20,31 @@ impl Client {
     }
 
     pub async fn repos(&self, owner: &str) -> Result<Vec<Repository>> {
-        let url = format!(
+        let mut url = format!(
             "https://hub.docker.com/v2/repositories/{}/?page={}&page_size={}",
-            owner, 1, 1000
+            owner, 1, 100
         );
 
-        println!("url: {}", url);
+        let mut results = vec![];
 
-        let res = self.get::<Repository>(url).await?;
+        loop {
+            let mut res = self.get::<Repository>(url).await?;
 
-        Ok(res.results)
+            results.append(&mut res.results);
+
+            match res.next {
+                serde_json::Value::String(u) => url = u,
+                _ => break,
+            }
+        }
+
+        Ok(results)
     }
 
     async fn get<T: DeserializeOwned>(&self, url: String) -> Result<Response<T>> {
-        let response = self
+        println!("get url: {}", url);
+
+        let res = self
             .client
             .get(url)
             .send()
@@ -41,7 +52,7 @@ impl Client {
             .json::<Response<T>>()
             .await?;
 
-        Ok(response)
+        Ok(res)
     }
 
     // pub fn of(owner: &str) -> Result<Self> {
