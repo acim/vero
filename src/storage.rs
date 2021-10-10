@@ -6,13 +6,13 @@ use std::fmt::Debug;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Project {
-    id: u64,
-    gh_owner: Option<String>,
-    gh_repo: Option<String>,
-    gh_l8st_rel: Option<String>,
-    dh_owner: Option<String>,
-    dh_repo: Option<String>,
-    dh_l8st_tag: Option<String>,
+    pub id: u64,
+    pub gh_owner: Option<String>,
+    pub gh_repo: Option<String>,
+    pub gh_l8st_rel: Option<String>,
+    pub dh_owner: Option<String>,
+    pub dh_repo: Option<String>,
+    pub dh_l8st_tag: Option<String>,
 }
 
 #[async_trait]

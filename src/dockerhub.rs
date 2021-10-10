@@ -14,7 +14,7 @@ impl Client {
         }
     }
 
-    pub async fn repos(&self, owner: &str) -> Result<Vec<Repository>> {
+    pub async fn repos(&self, owner: String) -> Result<Vec<Repository>> {
         let mut url = format!(
             "https://hub.docker.com/v2/repositories/{}/?page={}&page_size={}",
             owner, 1, 100
@@ -34,6 +34,21 @@ impl Client {
         }
 
         Ok(results)
+    }
+
+    pub async fn latest(&self, owner: String, repo: String) -> Result<String> {
+        let url = format!(
+            "https://hub.docker.com/v2/repositories/{}/{}/tags/?page={}&page_size={}",
+            owner, repo, 1, 100
+        );
+
+        let res = self.get::<Tag>(url).await?;
+
+        for tag in res.results {
+            println!("tag: {}", tag.name)
+        }
+
+        Ok("".to_string())
     }
 
     async fn get<T: DeserializeOwned>(&self, url: String) -> Result<Response<T>> {
