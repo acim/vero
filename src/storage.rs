@@ -18,9 +18,9 @@ pub struct Project {
 #[async_trait]
 pub trait Storage {
     async fn projects(&self) -> Result<Vec<Project>>;
-    async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> Result<()>;
-    async fn update_dh_l8st_tag(&self, id: u64, tag: String) -> Result<()>;
-    fn upsert_dh(&self, owner: String, repo: String);
+    async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> Result<u64>;
+    async fn update_dh_l8st_tag(&self, id: u64, tag: String) -> Result<u64>;
+    async fn insert_dh(&self, owner: String, repo: String) -> Result<u64>;
 }
 
 #[derive(Clone)]
@@ -33,92 +33,87 @@ impl MysqlStorage {
         Self { pool }
     }
 
-    pub fn disconnect(&self) {
-        let _rs = self.pool.clone().disconnect();
+    pub async fn disconnect(&self) -> Result<()> {
+        self.pool.clone().disconnect().await?;
+        Ok(())
     }
 }
 
 #[async_trait]
 impl Storage for MysqlStorage {
     async fn projects(&self) -> Result<Vec<Project>> {
-        let mut conn = self.pool.get_conn().await?;
         let q = r"SELECT id, gh_owner, gh_repo, gh_l8st_rel, dh_owner, dh_repo, dh_l8st_tag
-                  FROM projects";
-        let rs = conn.exec_map(
-            q,
-            (),
-            |(id, gh_owner, gh_repo, gh_l8st_rel, dh_owner, dh_repo, dh_l8st_tag)| Project {
-                id,
-                gh_owner,
-                gh_repo,
-                gh_l8st_rel,
-                dh_owner,
-                dh_repo,
-                dh_l8st_tag,
-            },
-        );
-        Ok(rs.await?)
+        FROM projects";
+
+        let mut conn = self.pool.get_conn().await?;
+
+        let res = conn
+            .exec_map(
+                q,
+                (),
+                |(id, gh_owner, gh_repo, gh_l8st_rel, dh_owner, dh_repo, dh_l8st_tag)| Project {
+                    id,
+                    gh_owner,
+                    gh_repo,
+                    gh_l8st_rel,
+                    dh_owner,
+                    dh_repo,
+                    dh_l8st_tag,
+                },
+            )
+            .await?;
+
+        Ok(res)
     }
 
-    async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> Result<()> {
-        let mut conn = self.pool.get_conn().await.unwrap();
+    async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> Result<u64> {
         let q = r"UPDATE projects SET gh_l8st_rel=:ver WHERE id=:id";
 
-        let rs = tokio::spawn(async move {
-            match conn
-                .exec_drop(
-                    q,
-                    params! {
-                        "id" => id,
-                        "ver" => ver,
-                    },
-                )
-                .await
-            {
-                Ok(_) => println!("update_gh_l8st_rel"),
-                Err(e) => eprintln!("error: {}", e),
-            }
-        });
+        let mut conn = self.pool.get_conn().await?;
 
-        Ok(rs.await?)
+        conn.exec_drop(
+            q,
+            params! {
+                "id" => id,
+                "ver" => ver,
+            },
+        )
+        .await?;
+
+        Ok(conn.affected_rows())
     }
 
-    async fn update_dh_l8st_tag(&self, id: u64, tag: String) -> Result<()> {
-        let mut conn = self.pool.get_conn().await?;
+    async fn update_dh_l8st_tag(&self, id: u64, tag: String) -> Result<u64> {
         let q = r"UPDATE projects SET dh_l8st_tag=:tag WHERE id=:id";
-        let rs = conn.exec_drop(
+
+        let mut conn = self.pool.get_conn().await?;
+
+        conn.exec_drop(
             q,
             params! {
                 "id" => id,
                 "tag" => tag,
             },
-        );
+        )
+        .await?;
 
-        Ok(rs.await?)
+        Ok(conn.affected_rows())
     }
 
-    fn upsert_dh(&self, owner: String, repo: String) {
-        let q = r"INSERT INTO projects (dh_owner, dh_repo) VALUES(:owner, :repo)
-                  ON DUPLICATE KEY UPDATE dh_owner=:owner, dh_repo=:repo";
+    async fn insert_dh(&self, owner: String, repo: String) -> Result<u64> {
+        let q = r"INSERT IGNORE INTO projects (dh_owner, dh_repo) VALUES(:owner, :repo)";
 
-        let conn = self.pool.get_conn();
+        let mut conn = self.pool.get_conn().await?;
 
-        tokio::spawn(async move {
-            match conn
-                .await
-                .unwrap() // TODO: Breaks here
-                .exec_drop(
-                    q,
-                    params! {
-                        "owner" => owner,
-                        "repo" => repo,
-                    },
-                )
-                .await
-            {
-                Ok(_) => println!("upsert_dh"),
-                Err(e) => eprintln!("error: {}", e),
-            }
-        });
+        conn.exec_drop(
+            q,
+            params! {
+                "owner" => owner,
+                "repo" => repo,
+            },
+        )
+        .await?;
+
+        Ok(conn.affected_rows())
     }
 }
