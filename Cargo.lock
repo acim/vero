@@ -909,9 +909,9 @@ dependencies = [
 
 [[package]]
 name = "mysql_async"
-version = "0.28.0"
+version = "0.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc8ee4bc1b23d674df356b9bffc2627313cb4d6c777ffb738dc7d20fc8537242"
+checksum = "583ffeecb619dfe9645ce1bba7406ad174e0012ee47a5302cf59e3e01cc7f6b2"
 dependencies = [
  "bytes",
  "flate2",
