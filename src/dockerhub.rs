@@ -1,5 +1,6 @@
 //!
 use reqwest::Result;
+use semver::Version;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
@@ -36,7 +37,7 @@ impl Client {
         Ok(results)
     }
 
-    pub async fn latest(&self, owner: String, repo: String) -> Result<String> {
+    pub async fn latest(&self, owner: String, repo: String) -> Result<Version> {
         let url = format!(
             "https://hub.docker.com/v2/repositories/{}/{}/tags/?page={}&page_size={}",
             owner, repo, 1, 100
@@ -44,11 +45,16 @@ impl Client {
 
         let res = self.get::<Tag>(url).await?;
 
+        let mut latest = Version::new(0, 0, 0);
         for tag in res.results {
-            println!("tag: {}", tag.name)
+            if let Ok(version) = Version::parse(&tag.name[..]) {
+                if version > latest {
+                    latest = version
+                }
+            }
         }
 
-        Ok("".to_string())
+        Ok(latest)
     }
 
     async fn get<T: DeserializeOwned>(&self, url: String) -> Result<Response<T>> {

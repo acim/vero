@@ -3,6 +3,7 @@
 
 use anyhow::Result;
 use clap::{AppSettings, Clap};
+use semver::Version;
 use std::env;
 use storage::Storage;
 
@@ -102,7 +103,25 @@ async fn main() -> Result<()> {
                 let owner = r.dh_owner.unwrap();
                 let repo = r.dh_repo.unwrap();
                 println!("owner: {:?} repo: {:?}", owner, repo);
-                let _ = c.latest(owner, repo).await.unwrap();
+                let latest = c.latest(owner, repo).await.unwrap();
+                match r.dh_l8st_tag {
+                    Some(t) => {
+                        let tt = Version::parse(&t[..]).unwrap();
+                        if latest > tt {
+                            let _ = s
+                                .update_dh_l8st_tag(r.id, latest.to_string())
+                                .await
+                                .unwrap();
+                        }
+                    }
+                    None => {
+                        let _ = s
+                            .update_dh_l8st_tag(r.id, latest.to_string())
+                            .await
+                            .unwrap();
+                    }
+                }
+                // let db_latest =
             }
             // s.update_gh_l8st_rel(99465516409683968, "v2.2.2".to_owned())
             //     .await
