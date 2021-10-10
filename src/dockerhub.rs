@@ -42,7 +42,11 @@ impl Repositories {
 
         println!("url: {}", url);
 
-        let response = self.client.get(&url).send()?.json::<Response>()?;
+        let response = self
+            .client
+            .get(&url)
+            .send()?
+            .json::<Response<Repository>>()?;
         self.repositories = response.results.into_iter();
         self.total = response.count;
         Ok(self.repositories.next())
@@ -63,11 +67,11 @@ impl Iterator for Repositories {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Response {
+pub struct Response<T> {
     pub count: u64,
     pub next: ::serde_json::Value,
     pub previous: ::serde_json::Value,
-    pub results: Vec<Repository>,
+    pub results: Vec<T>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
