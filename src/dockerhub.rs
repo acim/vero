@@ -27,15 +27,21 @@ impl Client {
 
         println!("url: {}", url);
 
+        let res = self.get::<Repository>(url).await?;
+
+        Ok(res.results)
+    }
+
+    async fn get<T: DeserializeOwned>(&self, url: String) -> Result<Response<T>> {
         let response = self
             .client
-            .get(&url)
+            .get(url)
             .send()
             .await?
-            .json::<Response<Repository>>()
+            .json::<Response<T>>()
             .await?;
 
-        Ok(response.results)
+        Ok(response)
     }
 
     // pub fn of(owner: &str) -> Result<Self> {
