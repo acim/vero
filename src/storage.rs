@@ -20,6 +20,7 @@ pub trait Storage {
     async fn projects(&self) -> Result<Vec<Project>>;
     async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> Result<()>;
     async fn update_dh_l8st_tag(&self, id: u64, tag: String) -> Result<()>;
+    async fn upsert_dh(&self, owner: String, repo: String) -> Result<()>;
 }
 
 #[derive(Clone)]
@@ -62,7 +63,7 @@ impl Storage for MysqlStorage {
 
     async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> Result<()> {
         let mut conn = self.pool.get_conn().await.unwrap();
-        let q = r"UPDATE projects SET gh_l8st_rel=:gh_l8st_rel WHERE id=:id";
+        let q = r"UPDATE projects SET gh_l8st_rel=:ver WHERE id=:id";
 
         let rs = tokio::spawn(async move {
             match conn
@@ -70,7 +71,7 @@ impl Storage for MysqlStorage {
                     q,
                     params! {
                         "id" => id,
-                        "gh_l8st_rel" => ver,
+                        "ver" => ver,
                     },
                 )
                 .await
@@ -85,14 +86,40 @@ impl Storage for MysqlStorage {
 
     async fn update_dh_l8st_tag(&self, id: u64, tag: String) -> Result<()> {
         let mut conn = self.pool.get_conn().await?;
-        let q = r"UPDATE projects SET dh_l8st_tag=:dh_l8st_tag WHERE id=:id";
+        let q = r"UPDATE projects SET dh_l8st_tag=:tag WHERE id=:id";
         let rs = conn.exec_drop(
             q,
             params! {
                 "id" => id,
-                "dh_l8st_tag" => tag,
+                "tag" => tag,
             },
         );
+
+        Ok(rs.await?)
+    }
+
+    async fn upsert_dh(&self, owner: String, repo: String) -> Result<()> {
+        let mut conn = self.pool.get_conn().await.unwrap();
+        let q = r"INSERT INTO projects (dh_owner, dh_repo)
+                  VALUES(:owner, :repo)
+                  ON CONFLICT ON CONSTRAINT dh_owner_repo_unique DO
+                  UPDATE SET owner=:owner, repo=:repo";
+
+        let rs = tokio::spawn(async move {
+            match conn
+                .exec_drop(
+                    q,
+                    params! {
+                        "owner" => owner,
+                        "repo" => repo,
+                    },
+                )
+                .await
+            {
+                Ok(_) => println!("upsert_dh"),
+                Err(e) => eprintln!("error: {}", e),
+            }
+        });
 
         Ok(rs.await?)
     }

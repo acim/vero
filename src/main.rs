@@ -81,6 +81,15 @@ async fn main() -> Result<()> {
         _ => println!("Don't be ridiculous"),
     }
 
+    let url = env::var("DSN")?;
+    let pool = mysql_async::Pool::new(&url[..]);
+
+    let s = storage::MysqlStorage::new(pool);
+    match s.projects().await {
+        Ok(rs) => println!("result: {:?}", rs),
+        Err(e) => eprintln!("error: {}", e),
+    }
+
     // You can handle information about subcommands by requesting their matches by name
     // (as below), requesting just the name used, or both at the same time
     match opts.subcmd {
@@ -92,7 +101,12 @@ async fn main() -> Result<()> {
                     {
                         for repo in repos {
                             match repo {
-                                Ok(r) => println!("repository: {}", r.name),
+                                Ok(r) => {
+                                    println!("repository: {}", r.name);
+                                    s.upsert_dh("library".to_string(), r.name).await?;
+
+                                    return Ok(());
+                                }
                                 Err(e) => eprintln!("error: {}", e),
                             }
                         }
@@ -104,15 +118,6 @@ async fn main() -> Result<()> {
             }
         },
         SubCommand::Server(_s) => {
-            let url = env::var("DSN")?;
-            let pool = mysql_async::Pool::new(&url[..]);
-
-            let s = storage::MysqlStorage::new(pool);
-            match s.projects().await {
-                Ok(rs) => println!("result: {:?}", rs),
-                Err(e) => eprintln!("error: {}", e),
-            }
-
             s.update_gh_l8st_rel(99465516409683968, "v2.2.2".to_owned())
                 .await?;
 
