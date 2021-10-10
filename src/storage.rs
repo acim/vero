@@ -1,3 +1,4 @@
+//!
 use async_trait::async_trait;
 use failure::Fail;
 use mysql_async::prelude::*;

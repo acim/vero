@@ -6,10 +6,11 @@ use storage::Storage;
 
 // use mysql_async::prelude::*;
 
+mod dockerhub;
 mod storage;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), reqwest::Error> {
     let url = env::var("DSN").unwrap();
     let pool = mysql_async::Pool::new(&url[..]);
 
@@ -39,4 +40,10 @@ async fn main() {
     futures::future::join_all(handles).await;
 
     s.disconnect().await.unwrap();
+
+    // DockerHub
+    for repo in dockerhub::Repositories::of("library")? {
+        println!("repository: {}", repo?.name);
+    }
+    Ok(())
 }
