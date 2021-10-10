@@ -1,6 +1,6 @@
 //!
 use reqwest::Result;
-use semver::Version;
+use semver::{BuildMetadata, Prerelease, Version};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
@@ -53,6 +53,9 @@ impl Client {
                 }
             }
         }
+
+        latest.pre = Prerelease::EMPTY;
+        latest.build = BuildMetadata::EMPTY;
 
         Ok(latest)
     }
