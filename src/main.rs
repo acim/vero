@@ -92,23 +92,12 @@ async fn main() {
     match opts.subcmd {
         SubCommand::Import(sc) => match sc.subcmd {
             SubSubCommand::DockerHub(_dh) => {
-                tokio::task::spawn_blocking(move || {
-                    if let Ok(repos) = dockerhub::Collection::<dockerhub::Repository>::of("library")
-                    {
-                        for repo in repos {
-                            match repo {
-                                Ok(r) => {
-                                    println!("repository: {}", r.name);
-                                    s.insert_dh("library".to_string(), r.name);
-                                }
-                                Err(e) => eprintln!("error: {}", e),
-                            }
-                        }
-                        s.disconnect();
-                    }
-                })
-                .await
-                .unwrap();
+                let c = dockerhub::Client::new();
+                for r in c.repos("library").await.unwrap() {
+                    println!("repository: {}", r.name);
+                    s.insert_dh("library".to_string(), r.name).await.unwrap();
+                }
+                s.disconnect().await.unwrap();
             }
         },
         SubCommand::Server(_s) => {
@@ -120,7 +109,7 @@ async fn main() {
                 .await
                 .unwrap();
 
-            s.disconnect();
+            s.disconnect().await.unwrap();
         }
     }
 }
