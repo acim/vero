@@ -1,6 +1,7 @@
 //!
 #![warn(missing_debug_implementations, rust_2018_idioms, missing_docs)]
 
+use anyhow::Result;
 use std::env;
 use storage::Storage;
 
@@ -10,8 +11,8 @@ mod dockerhub;
 mod storage;
 
 #[tokio::main]
-async fn main() -> Result<(), reqwest::Error> {
-    let url = env::var("DSN").unwrap();
+async fn main() -> Result<()> {
+    let url = env::var("DSN")?;
     let pool = mysql_async::Pool::new(&url[..]);
 
     let s = storage::MysqlStorage::new(pool);
@@ -20,26 +21,13 @@ async fn main() -> Result<(), reqwest::Error> {
         Err(e) => eprintln!("error: {}", e),
     }
 
-    let mut handles = vec![];
+    s.update_gh_l8st_rel(99465516409683968, "v2.2.2".to_owned())
+        .await?;
 
-    handles.push(
-        s.update_gh_l8st_rel(99465516409683968, "v1.0.0".to_owned())
-            .await,
-    );
+    s.update_dh_l8st_tag(99465516409683968, "v2.2.2".to_owned())
+        .await?;
 
-    {
-        let s = s.clone();
-        handles.push(tokio::spawn(async move {
-            match s.update_dh_l8st_tag(99465516409683968, "v1.0.0").await {
-                Ok(_) => (),
-                Err(e) => eprintln!("error: {}", e),
-            }
-        }));
-    }
-
-    futures::future::join_all(handles).await;
-
-    s.disconnect().await.unwrap();
+    s.disconnect().await?;
 
     // DockerHub
     tokio::task::spawn_blocking(move || {
@@ -52,8 +40,7 @@ async fn main() -> Result<(), reqwest::Error> {
             }
         }
     })
-    .await
-    .unwrap();
+    .await?;
 
     Ok(())
 }

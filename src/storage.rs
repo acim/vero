@@ -1,6 +1,6 @@
 //!
+use anyhow::Result;
 use async_trait::async_trait;
-use failure::Fail;
 use mysql_async::prelude::*;
 use std::fmt::Debug;
 
@@ -15,23 +15,11 @@ pub struct Project {
     dh_l8st_tag: Option<String>,
 }
 
-#[derive(Debug, Fail)]
-#[fail(display = "storage error {}", m)]
-pub struct Error {
-    m: String,
-}
-
-impl From<mysql_async::Error> for Error {
-    fn from(err: mysql_async::Error) -> Error {
-        Error { m: err.to_string() }
-    }
-}
-
 #[async_trait]
 pub trait Storage {
-    async fn projects(&self) -> Result<Vec<Project>, Error>;
-    async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> tokio::task::JoinHandle<()>;
-    async fn update_dh_l8st_tag(&self, id: u64, tag: &str) -> Result<(), Error>;
+    async fn projects(&self) -> Result<Vec<Project>>;
+    async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> Result<()>;
+    async fn update_dh_l8st_tag(&self, id: u64, tag: String) -> Result<()>;
 }
 
 #[derive(Clone)]
@@ -44,7 +32,7 @@ impl MysqlStorage {
         Self { pool }
     }
 
-    pub async fn disconnect(&self) -> Result<(), Error> {
+    pub async fn disconnect(&self) -> Result<()> {
         let rs = self.pool.clone().disconnect();
         Ok(rs.await?)
     }
@@ -52,7 +40,7 @@ impl MysqlStorage {
 
 #[async_trait]
 impl Storage for MysqlStorage {
-    async fn projects(&self) -> Result<Vec<Project>, Error> {
+    async fn projects(&self) -> Result<Vec<Project>> {
         let mut conn = self.pool.get_conn().await?;
         let q = r"SELECT id, gh_owner, gh_repo, gh_l8st_rel, dh_owner, dh_repo, dh_l8st_tag
                   FROM projects";
@@ -72,11 +60,11 @@ impl Storage for MysqlStorage {
         Ok(rs.await?)
     }
 
-    async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> tokio::task::JoinHandle<()> {
+    async fn update_gh_l8st_rel(&self, id: u64, ver: String) -> Result<()> {
         let mut conn = self.pool.get_conn().await.unwrap();
         let q = r"UPDATE projects SET gh_l8st_rel=:gh_l8st_rel WHERE id=:id";
 
-        tokio::spawn(async move {
+        let rs = tokio::spawn(async move {
             match conn
                 .exec_drop(
                     q,
@@ -90,10 +78,12 @@ impl Storage for MysqlStorage {
                 Ok(_) => println!("update_gh_l8st_rel"),
                 Err(e) => eprintln!("error: {}", e),
             }
-        })
+        });
+
+        Ok(rs.await?)
     }
 
-    async fn update_dh_l8st_tag(&self, id: u64, tag: &str) -> Result<(), Error> {
+    async fn update_dh_l8st_tag(&self, id: u64, tag: String) -> Result<()> {
         let mut conn = self.pool.get_conn().await?;
         let q = r"UPDATE projects SET dh_l8st_tag=:dh_l8st_tag WHERE id=:id";
         let rs = conn.exec_drop(
@@ -103,6 +93,7 @@ impl Storage for MysqlStorage {
                 "dh_l8st_tag" => tag,
             },
         );
+
         Ok(rs.await?)
     }
 }
