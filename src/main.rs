@@ -42,8 +42,18 @@ async fn main() -> Result<(), reqwest::Error> {
     s.disconnect().await.unwrap();
 
     // DockerHub
-    for repo in dockerhub::Repositories::of("library")? {
-        println!("repository: {}", repo?.name);
-    }
+    tokio::task::spawn_blocking(move || {
+        if let Ok(repos) = dockerhub::Repositories::of("library") {
+            for repo in repos {
+                match repo {
+                    Ok(r) => println!("repository: {}", r.name),
+                    Err(e) => eprintln!("error: {}", e),
+                }
+            }
+        }
+    })
+    .await
+    .unwrap();
+
     Ok(())
 }

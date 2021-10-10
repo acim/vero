@@ -5,9 +5,9 @@ pub struct Repositories {
     owner: String,
     repositories: <Vec<Repository> as IntoIterator>::IntoIter,
     client: reqwest::blocking::Client,
-    page: u32,
-    per_page: u32,
-    total: u32,
+    page: u64,
+    per_page: u64,
+    total: u64,
 }
 
 impl Repositories {
@@ -59,7 +59,7 @@ impl Iterator for Repositories {
 #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Data {
-    pub count: u32,
+    pub count: u64,
     pub next: String,
     pub previous: ::serde_json::Value,
     pub results: Vec<Repository>,
@@ -73,7 +73,7 @@ pub struct Repository {
     pub namespace: String,
     #[serde(rename = "repository_type")]
     pub repository_type: String,
-    pub status: u32,
+    pub status: u64,
     pub description: String,
     #[serde(rename = "is_private")]
     pub is_private: bool,
@@ -82,15 +82,15 @@ pub struct Repository {
     #[serde(rename = "can_edit")]
     pub can_edit: bool,
     #[serde(rename = "star_count")]
-    pub star_count: u32,
+    pub star_count: u64,
     #[serde(rename = "pull_count")]
-    pub pull_count: u32,
+    pub pull_count: u64,
     #[serde(rename = "last_updated")]
     pub last_updated: String,
     #[serde(rename = "is_migrated")]
     pub is_migrated: bool,
     #[serde(rename = "collaborator_count")]
-    pub collaborator_count: u32,
+    pub collaborator_count: u64,
     pub affiliation: ::serde_json::Value,
     #[serde(rename = "hub_user")]
     pub hub_user: String,
