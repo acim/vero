@@ -109,21 +109,21 @@ pub struct Repository {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Tag {
-    pub creator: i64,
-    pub id: i64,
+    pub creator: u64,
+    pub id: u64,
     #[serde(rename = "image_id")]
     pub image_id: ::serde_json::Value,
     pub images: Vec<Image>,
     #[serde(rename = "last_updated")]
     pub last_updated: Option<String>,
     #[serde(rename = "last_updater")]
-    pub last_updater: i64,
+    pub last_updater: u64,
     #[serde(rename = "last_updater_username")]
     pub last_updater_username: String,
     pub name: String,
-    pub repository: i64,
+    pub repository: u64,
     #[serde(rename = "full_size")]
-    pub full_size: i64,
+    pub full_size: u64,
     pub v2: bool,
     #[serde(rename = "tag_status")]
     pub tag_status: String,
@@ -145,7 +145,7 @@ pub struct Image {
     pub os_features: String,
     #[serde(rename = "os_version")]
     pub os_version: ::serde_json::Value,
-    pub size: i64,
+    pub size: u64,
     pub status: String,
     #[serde(rename = "last_pulled")]
     pub last_pulled: Option<String>,
