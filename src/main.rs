@@ -31,7 +31,7 @@ struct Opts {
 #[derive(Clap)]
 enum SubCommand {
     Import(ImportCmd),
-    Server(ServerCmd),
+    Serve(ServeCmd),
 }
 
 /// Import data
@@ -46,7 +46,7 @@ struct ImportCmd {
 
 /// Run server
 #[derive(Clap)]
-struct ServerCmd {
+struct ServeCmd {
     /// Print debug info
     #[clap(short)]
     debug: bool,
@@ -96,13 +96,13 @@ async fn main() -> Result<()> {
                 }
             }
         },
-        SubCommand::Server(_s) => {
+        SubCommand::Serve(_s) => {
             let c = dockerhub::Client::new();
             for r in s.projects().await.unwrap() {
                 let owner = r.dh_owner.unwrap();
                 let repo = r.dh_repo.unwrap();
                 println!("owner: {:?} repo: {:?}", owner, repo);
-                let latest = c.latest(owner, repo).await.unwrap();
+                let _ = c.latest(owner, repo).await.unwrap();
             }
             // s.update_gh_l8st_rel(99465516409683968, "v2.2.2".to_owned())
             //     .await

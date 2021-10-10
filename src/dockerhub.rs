@@ -128,7 +128,7 @@ pub struct Tag {
     #[serde(rename = "tag_status")]
     pub tag_status: String,
     #[serde(rename = "tag_last_pulled")]
-    pub tag_last_pulled: String,
+    pub tag_last_pulled: Option<String>,
     #[serde(rename = "tag_last_pushed")]
     pub tag_last_pushed: String,
 }
@@ -138,8 +138,8 @@ pub struct Tag {
 pub struct Image {
     pub architecture: String,
     pub features: String,
-    pub variant: ::serde_json::Value,
-    pub digest: String,
+    pub variant: Option<String>,
+    pub digest: Option<String>,
     pub os: String,
     #[serde(rename = "os_features")]
     pub os_features: String,
@@ -148,7 +148,7 @@ pub struct Image {
     pub size: i64,
     pub status: String,
     #[serde(rename = "last_pulled")]
-    pub last_pulled: String,
+    pub last_pulled: Option<String>,
     #[serde(rename = "last_pushed")]
-    pub last_pushed: String,
+    pub last_pushed: Option<String>,
 }
