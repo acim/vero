@@ -4,16 +4,22 @@ use serde::{Deserialize, Serialize};
 
 const PER_PAGE: u64 = 100;
 
-pub struct Repositories {
+pub struct Repositories<T>
+where
+    T: serde::de::DeserializeOwned,
+{
     owner: String,
-    repositories: <Vec<Repository> as IntoIterator>::IntoIter,
+    repositories: <Vec<T> as IntoIterator>::IntoIter,
     client: reqwest::blocking::Client,
     page: u64,
     per_page: u64,
     total: u64,
 }
 
-impl Repositories {
+impl<T> Repositories<T>
+where
+    T: serde::de::DeserializeOwned,
+{
     pub fn of(owner: &str) -> Result<Self> {
         Ok(Repositories {
             owner: owner.to_owned(),
@@ -25,7 +31,7 @@ impl Repositories {
         })
     }
 
-    fn try_next(&mut self) -> Result<Option<Repository>> {
+    fn try_next(&mut self) -> Result<Option<T>> {
         if let Some(repo) = self.repositories.next() {
             return Ok(Some(repo));
         }
@@ -42,19 +48,18 @@ impl Repositories {
 
         println!("url: {}", url);
 
-        let response = self
-            .client
-            .get(&url)
-            .send()?
-            .json::<Response<Repository>>()?;
+        let response = self.client.get(&url).send()?.json::<Response<T>>()?;
         self.repositories = response.results.into_iter();
         self.total = response.count;
         Ok(self.repositories.next())
     }
 }
 
-impl Iterator for Repositories {
-    type Item = Result<Repository>;
+impl<T> Iterator for Repositories<T>
+where
+    T: serde::de::DeserializeOwned,
+{
+    type Item = Result<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.try_next() {
