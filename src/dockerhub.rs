@@ -1,5 +1,6 @@
 //!
 use reqwest::Result;
+use serde::{Deserialize, Serialize};
 
 const PER_PAGE: u64 = 100;
 
@@ -41,11 +42,7 @@ impl Repositories {
 
         println!("url: {}", url);
 
-        let response = self
-            .client
-            .get(&url)
-            .send()?
-            .json::<RepositoriesResponse>()?;
+        let response = self.client.get(&url).send()?.json::<Response>()?;
         self.repositories = response.results.into_iter();
         self.total = response.count;
         Ok(self.repositories.next())
@@ -64,17 +61,16 @@ impl Iterator for Repositories {
     }
 }
 
-// Owner repositories
-#[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct RepositoriesResponse {
+pub struct Response {
     pub count: u64,
     pub next: ::serde_json::Value,
     pub previous: ::serde_json::Value,
     pub results: Vec<Repository>,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Repository {
     pub user: String,
@@ -105,17 +101,7 @@ pub struct Repository {
     pub hub_user: String,
 }
 
-// Repository tags
-#[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TagsResponse {
-    pub count: i64,
-    pub next: String,
-    pub previous: ::serde_json::Value,
-    pub results: Vec<Tag>,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Tag {
     pub creator: i64,
@@ -142,7 +128,7 @@ pub struct Tag {
     pub tag_last_pushed: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Image {
     pub architecture: String,

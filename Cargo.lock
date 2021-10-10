@@ -1946,7 +1946,6 @@ dependencies = [
  "mysql_async",
  "reqwest",
  "serde",
- "serde_derive",
  "serde_json",
  "tokio",
 ]
