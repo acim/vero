@@ -4,12 +4,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
 pub struct Client {
-    // owner: String,
-    // repositories: Vec<T>,
     client: reqwest::Client,
-    // page: u64,
-    // per_page: u64,
-    // total: u64,
 }
 
 impl Client {
@@ -54,55 +49,6 @@ impl Client {
 
         Ok(res)
     }
-
-    // pub fn of(owner: &str) -> Result<Self> {
-    //     Ok(Collection {
-    //         owner: owner.to_owned(),
-    //         repositories: vec![],
-    //         client: reqwest::Client::new(),
-    //         page: 0,
-    //         per_page: PER_PAGE,
-    //         total: 0,
-    //     })
-    // }
-
-    // async fn next<T: DeserializeOwned>(&mut self) -> Option<Result<T>> {
-    // match self.try_next() {
-    //     Ok(Some(repo)) => Some(Ok(repo)),
-    //     Ok(None) => None,
-    //     Err(err) => Some(Err(err)),
-    // }
-    //     todo!()
-    // }
-
-    // async fn try_next(&mut self) -> Result<Option<T>> {
-    //     if let Some(repo) = self.repositories.next() {
-    //         return Ok(Some(repo));
-    //     }
-
-    //     if self.page > 0 && self.page * self.per_page >= self.total {
-    //         return Ok(None);
-    //     }
-
-    //     self.page += 1;
-    //     let url = format!(
-    //         "https://hub.docker.com/v2/repositories/{}/?page={}&page_size={}",
-    //         self.owner, self.page, self.per_page
-    //     );
-
-    //     println!("url: {}", url);
-
-    //     let response = self
-    //         .client
-    //         .get(&url)
-    //         .send()
-    //         .await?
-    //         .json::<Response<T>>()
-    //         .await?;
-    //     self.repositories = response.results.into_iter();
-    //     self.total = response.count;
-    //     Ok(self.repositories.next())
-    // }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
