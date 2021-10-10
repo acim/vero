@@ -115,7 +115,7 @@ pub struct Tag {
     pub image_id: ::serde_json::Value,
     pub images: Vec<Image>,
     #[serde(rename = "last_updated")]
-    pub last_updated: String,
+    pub last_updated: Option<String>,
     #[serde(rename = "last_updater")]
     pub last_updater: i64,
     #[serde(rename = "last_updater_username")]
@@ -130,7 +130,7 @@ pub struct Tag {
     #[serde(rename = "tag_last_pulled")]
     pub tag_last_pulled: Option<String>,
     #[serde(rename = "tag_last_pushed")]
-    pub tag_last_pushed: String,
+    pub tag_last_pushed: Option<String>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
