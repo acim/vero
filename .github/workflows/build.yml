@@ -46,11 +46,10 @@ jobs:
         with:
           command: install
           args: cargo-pants
-      - name: Run cargo pants
-        uses: actions-rs/cargo@v1
-        with:
-          command: pants
-        continue-on-error: true
+      # - name: Run cargo pants                ENABLE ME
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: pants
       # - name: Set up Docker Buildx
       #   uses: docker/setup-buildx-action@v1.6.0
       # - name: Set up cache
