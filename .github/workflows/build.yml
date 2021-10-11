@@ -46,6 +46,7 @@ jobs:
         with:
           command: install
           args: cargo-pants
+        continue-on-error: true
       - name: Run cargo pants
         uses: actions-rs/cargo@v1
         with:
