@@ -32,6 +32,15 @@ jobs:
         with:
           command: build
           args: --release --all-features
+      - name: Install cargo audit
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: ccargo-audit
+      - name: Run cargo audit
+        uses: actions-rs/cargo@v1
+        with:
+          command: audit
       - name: Install cargo pants
         uses: actions-rs/cargo@v1
         with:
@@ -41,7 +50,6 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: pants
-          args: cargo-pants
       # - name: Set up Docker Buildx
       #   uses: docker/setup-buildx-action@v1
       # - name: Set up cache
