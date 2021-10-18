@@ -2,7 +2,7 @@
 #![warn(missing_debug_implementations, rust_2018_idioms, missing_docs)]
 
 use anyhow::Result;
-use clap::{AppSettings, Clap};
+use clap::{ColorChoice, Parser};
 use semver::Version;
 use std::env;
 use storage::Storage;
@@ -14,8 +14,8 @@ mod storage;
 
 /// This doc string acts as a help message when the user runs '--help'
 /// as do all doc strings on fields
-#[derive(Clap)]
-#[clap(setting = AppSettings::ColoredHelp)]
+#[derive(Parser)]
+#[clap(color = ColorChoice::Auto)]
 struct Opts {
     /// Sets a custom config file. Could have been an Option<T> with no default too
     #[clap(short, long, default_value = "default.conf")]
@@ -29,14 +29,14 @@ struct Opts {
     subcmd: SubCommand,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 enum SubCommand {
     Import(ImportCmd),
     Serve(ServeCmd),
 }
 
 /// Import data
-#[derive(Clap)]
+#[derive(Parser)]
 struct ImportCmd {
     /// Print debug info
     #[clap(short)]
@@ -46,20 +46,20 @@ struct ImportCmd {
 }
 
 /// Run server
-#[derive(Clap)]
+#[derive(Parser)]
 struct ServeCmd {
     /// Print debug info
     #[clap(short)]
     debug: bool,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 enum SubSubCommand {
     DockerHub(DockerHubCmd),
 }
 
 /// Import data from DockerHub
-#[derive(Clap)]
+#[derive(Parser)]
 struct DockerHubCmd {
     /// Print debug info
     #[clap(short)]

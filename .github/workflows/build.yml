@@ -32,20 +32,20 @@ jobs:
         with:
           command: build
           args: --release --all-features
-      - name: Install cargo audit
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-audit
-      - name: Run cargo audit
-        uses: actions-rs/cargo@v1
-        with:
-          command: audit
-      - name: Install cargo pants
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-pants
+      # - name: Install cargo audit
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: install
+      #     args: cargo-audit
+      # - name: Run cargo audit
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: audit
+      # - name: Install cargo pants
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: install
+      #     args: cargo-pants
       # - name: Run cargo pants                ENABLE ME
       #   uses: actions-rs/cargo@v1
       #   with:
