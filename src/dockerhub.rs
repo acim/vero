@@ -75,7 +75,7 @@ impl Client {
     }
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Response<T> {
     pub count: u64,
     pub next: ::serde_json::Value,
@@ -103,7 +103,7 @@ pub struct Repository {
     pub hub_user: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Tag {
     pub creator: u64,
     pub id: u64,
