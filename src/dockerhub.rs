@@ -83,7 +83,7 @@ pub struct Response<T> {
     pub results: Vec<T>,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Repository {
     pub user: String,
     pub name: String,
@@ -121,7 +121,7 @@ pub struct Tag {
     pub tag_last_pushed: Option<String>,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Image {
     pub architecture: String,
     pub features: String,
