@@ -61,7 +61,7 @@ impl Client {
     }
 
     async fn get<T: DeserializeOwned>(&self, url: String) -> Result<Response<T>> {
-        println!("get url: {}", url);
+        println!("get url: {url}");
 
         let res = self
             .client

@@ -79,7 +79,7 @@ async fn main() -> Result<()> {
             for r in s.projects().await.unwrap() {
                 let owner = r.dh_owner.unwrap();
                 let repo = r.dh_repo.unwrap();
-                println!("owner: {:?} repo: {:?}", owner, repo);
+                println!("owner: {owner:?} repo: {repo:?}");
                 let latest = c.latest(owner, repo).await.unwrap();
                 match r.dh_l8st_tag {
                     Some(t) => {
