@@ -9,5 +9,6 @@ check:
 
 lint:
 	cargo +nightly fmt --all -- --check
-	cargo +nightly clippy -- -D warnings
+	# cargo +nightly clippy -- -D warnings
+	cargo clippy -- -D warnings
 
